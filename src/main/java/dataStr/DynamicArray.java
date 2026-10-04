@@ -20,7 +20,11 @@ public class DynamicArray implements IntList {
     }
 
     public DynamicArray(int initialCapacity) {
-        this.data = new int[initialCapacity];
+        if (initialCapacity < 0) {
+            throw new IllegalArgumentException("Negative capacity: " + initialCapacity);
+        }
+        // Capacity 0 would never grow with "length * 2", so keep at least one cell.
+        this.data = new int[Math.max(1, initialCapacity)];
         this.size = 0;
     }
 
@@ -47,6 +51,9 @@ public class DynamicArray implements IntList {
 
     /** Doubles the capacity and copies all elements (counted as one step + one move each). */
     private void grow() {
+        if (data.length > Integer.MAX_VALUE / 2) {
+            throw new IllegalStateException("Capacity overflow");
+        }
         int[] newData = new int[data.length * 2];
         for (int i = 0; i < size; i++) {
             newData[i] = data[i];

@@ -20,6 +20,7 @@ public class MyLinkedList implements IntList {
     }
 
     private Node head;
+    private Node tail;              // makes appending O(1)
     private int size;
     private final Metrics metrics = new Metrics();
 
@@ -33,22 +34,18 @@ public class MyLinkedList implements IntList {
         return size;
     }
 
-    /** Appends {@code x}: walks to the last node, so this version is O(n). */
+    /** Appends {@code x} in O(1) using the tail pointer. */
     @Override
     public void add(int x) {
         Node node = new Node(x);
         if (head == null) {
             head = node;
-            metrics.moves++;
+            tail = node;
         } else {
-            Node current = head;
-            while (current.next != null) {
-                current = current.next;
-                metrics.steps++;
-            }
-            current.next = node;
-            metrics.moves++;
+            tail.next = node;
+            tail = node;
         }
+        metrics.moves += 2;            // two link updates in both branches
         size++;
     }
 
@@ -86,6 +83,10 @@ public class MyLinkedList implements IntList {
             int removed = head.value;
             head = head.next;
             metrics.moves++;
+            if (head == null) {
+                tail = null;           // the list became empty
+                metrics.moves++;
+            }
             size--;
             return removed;
         }
@@ -94,9 +95,14 @@ public class MyLinkedList implements IntList {
             previous = previous.next;
             metrics.steps++;
         }
-        int removed = previous.next.value;
-        previous.next = previous.next.next;
+        Node target = previous.next;
+        int removed = target.value;
+        previous.next = target.next;
         metrics.moves++;
+        if (target == tail) {
+            tail = previous;           // the last node was removed
+            metrics.moves++;
+        }
         size--;
         return removed;
     }
@@ -105,6 +111,10 @@ public class MyLinkedList implements IntList {
     public void add(int index, int x) {
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
+        if (index == size) {           // also covers the empty list
+            add(x);
+            return;
         }
         Node node = new Node(x);
         if (index == 0) {

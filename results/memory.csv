@@ -1,0 +1,13 @@
+structure,n,bytes,mb,method
+DynamicArray,100,720,0.000687,heap-delta
+MyLinkedList,100,2472,0.002357,heap-delta
+MinHeap,100,720,0.000687,heap-delta
+DynamicArray,1000,5200,0.004959,heap-delta
+MyLinkedList,1000,24072,0.022957,heap-delta
+MinHeap,1000,5200,0.004959,heap-delta
+DynamicArray,10000,41040,0.039139,heap-delta
+MyLinkedList,10000,240072,0.228951,heap-delta
+MinHeap,10000,41040,0.039139,heap-delta
+DynamicArray,100000,655440,0.625076,heap-delta
+MyLinkedList,100000,2400072,2.288887,heap-delta
+MinHeap,100000,655440,0.625076,heap-delta

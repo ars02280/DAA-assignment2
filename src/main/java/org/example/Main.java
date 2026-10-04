@@ -1,17 +1,28 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+import benchmark.Benchmark;
+import benchmark.CsvWriter;
+import benchmark.Result;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
-        }
+import java.nio.file.Path;
+import java.util.List;
+
+/**
+ * Entry point. One command runs the whole benchmark and writes the CSV files:
+ * <pre>
+ *     mvn compile exec:java            (optional argument: output directory, default "results")
+ * </pre>
+ */
+public class Main {
+
+    public static void main(String[] args) {
+        Path outDir = Path.of(args.length > 0 ? args[0] : "results");
+
+        System.out.println("workload,variant,structure,n,time_ms,steps,moves,comparisons");
+        List<Result> results = Benchmark.runAll(
+                Benchmark.SIZES, Benchmark.WARMUP_RUNS, Benchmark.MEASURED_RUNS, System.out::println);
+        CsvWriter.write(outDir.resolve("results.csv"), results);
+
+        System.out.println("Written: " + outDir.resolve("results.csv"));
     }
 }

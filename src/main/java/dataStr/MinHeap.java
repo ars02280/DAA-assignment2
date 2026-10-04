@@ -75,6 +75,65 @@ public class MinHeap implements Measurable {
         metrics.moves++;               // final store of x
     }
 
+    /**
+     * Removes and returns the smallest element; O(log n).
+     * The last element is taken out and sifted down from the root.
+     */
+    public int extractMin() {
+        if (size == 0) {
+            throw new IllegalStateException("Heap is empty");
+        }
+        int min = data[0];
+        metrics.steps++;               // read data[0]
+        size--;
+        if (size > 0) {
+            int last = data[size];
+            metrics.steps++;           // read the last element
+            siftDown(0, last);
+        }
+        return min;
+    }
+
+    /**
+     * Bubble-down: places {@code x} into the subtree rooted at {@code root}, assuming that both
+     * child subtrees of {@code root} are already heaps and that the cell {@code root} is a free "hole".
+     * <p>
+     * Loop invariant (i = current hole, r = {@code root}), true before every iteration:
+     * <ol>
+     *   <li>every parent-child pair of the subtree of r that does not involve the cell i
+     *       satisfies {@code data[parent] <= data[child]};</li>
+     *   <li>if {@code i != r}, then {@code data[parent(i)] <= x} and
+     *       {@code data[parent(i)] <= data[c]} for both children c of i.</li>
+     * </ol>
+     * When the loop stops, storing x into the hole gives a valid heap (see REPORT.md for the proof).
+     */
+    private void siftDown(int root, int x) {
+        int i = root;
+        while (true) {
+            int child = 2 * i + 1;
+            if (child >= size) {
+                break;                 // the hole is a leaf
+            }
+            metrics.steps++;           // read data[child] (left)
+            if (child + 1 < size) {
+                metrics.steps++;       // read data[child + 1] (right)
+                metrics.comparisons++; // left vs right
+                if (data[child + 1] < data[child]) {
+                    child++;           // the smaller child
+                }
+            }
+            metrics.comparisons++;     // smaller child vs x
+            if (data[child] >= x) {
+                break;
+            }
+            data[i] = data[child];     // move the smaller child up into the hole
+            metrics.moves++;
+            i = child;
+        }
+        data[i] = x;
+        metrics.moves++;               // final store of x
+    }
+
     private void grow() {
         if (data.length > Integer.MAX_VALUE / 2) {
             throw new IllegalStateException("Capacity overflow");

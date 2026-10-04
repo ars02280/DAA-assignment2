@@ -1,146 +1,153 @@
 package dataStr;
 
-public class MyLinkedList {
+/**
+ * Singly linked list of primitive {@code int} values, written from scratch
+ * (no {@code java.util} collections, no boxing).
+ * <p>
+ * Counting rules: a <b>step</b> is one move to the next node, a <b>move</b> is one
+ * link update (every assignment to a {@code next} pointer or to {@code head}),
+ * a <b>comparison</b> is one comparison of two elements.
+ */
+public class MyLinkedList implements IntList {
 
-    private int size;
-    private Node head;
-    private long steps = 0;
-    private long moves = 0;
-    private long comparisons = 0;
-
-
-
-    private static class Node {
-        int value;
+    private static final class Node {
+        final int value;
         Node next;
 
         Node(int value) {
             this.value = value;
-            this.next = null;
         }
     }
 
-   public void add(int x){
-       Node newNode = new Node(x);
-       if (head == null){
-           head = newNode;
-           moves++;
-       }
-       else{
-          Node current= head;
-          while (current.next != null){
-              steps++;
+    private Node head;
+    private Node tail;              // makes appending O(1)
+    private int size;
+    private final Metrics metrics = new Metrics();
 
-               current = current.next;
-          }
-          current.next = newNode;
-          moves++;
-
-       }
-       size++;
+    @Override
+    public Metrics metrics() {
+        return metrics;
     }
 
+    @Override
+    public int size() {
+        return size;
+    }
 
-
-    public int get(int index){
-        if (index >= size || index < 0){
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+    /** Appends {@code x} in O(1) using the tail pointer. */
+    @Override
+    public void add(int x) {
+        Node node = new Node(x);
+        if (head == null) {
+            head = node;
+            tail = node;
+        } else {
+            tail.next = node;
+            tail = node;
         }
+        metrics.moves += 2;            // two link updates in both branches
+        size++;
+    }
+
+    @Override
+    public int get(int index) {
+        checkElementIndex(index);
         Node current = head;
-        for (int i =0;i < index;i++){
+        for (int i = 0; i < index; i++) {
             current = current.next;
-            steps++;
+            metrics.steps++;
         }
-        int elem = current.value;
-        return elem;
+        return current.value;
     }
 
-    public boolean contains(int x){
-
+    @Override
+    public boolean contains(int x) {
         Node current = head;
-        for (int i =0;i < size ;i++){
-            steps++;
-            comparisons++;
-            if (current.value ==x){return true;}
+        while (current != null) {
+            metrics.comparisons++;
+            if (current.value == x) {
+                return true;
+            }
             current = current.next;
+            if (current != null) {
+                metrics.steps++;
+            }
         }
         return false;
     }
 
-public int remove(int index){
-    if (index >= size || index < 0){
-        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-    }
-    if(index ==0){
-        int removedValue = head.value;
-        head = head.next;
-        moves++;
-        size--;
-        return removedValue;
-    }
-    if (index > 0){
-        Node current = head;
-
-        for (int i =0;i < index - 1;i++){
-            current = current.next;
-            steps++;
+    @Override
+    public int remove(int index) {
+        checkElementIndex(index);
+        if (index == 0) {
+            int removed = head.value;
+            head = head.next;
+            metrics.moves++;
+            if (head == null) {
+                tail = null;           // the list became empty
+                metrics.moves++;
+            }
+            size--;
+            return removed;
         }
-        steps++;
-        int elem = current.next.value;
-
-        Node prev = current;
-        prev.next = prev.next.next;
-        moves++;
+        Node previous = head;
+        for (int i = 0; i < index - 1; i++) {
+            previous = previous.next;
+            metrics.steps++;
+        }
+        Node target = previous.next;
+        int removed = target.value;
+        previous.next = target.next;
+        metrics.moves++;
+        if (target == tail) {
+            tail = previous;           // the last node was removed
+            metrics.moves++;
+        }
         size--;
-        return elem;
+        return removed;
     }
-    return -1;
-}
 
-public  void  add(int index, int x){
-    if (index > size || index < 0){
-        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
-    }
-    if(index ==0){
-        Node newNode = new Node(x);
-        newNode.next = head;
-        head = newNode;
-        moves++;
+    @Override
+    public void add(int index, int x) {
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
+        if (index == size) {           // also covers the empty list
+            add(x);
+            return;
+        }
+        Node node = new Node(x);
+        if (index == 0) {
+            node.next = head;
+            head = node;
+            metrics.moves += 2;
+        } else {
+            Node previous = head;
+            for (int i = 0; i < index - 1; i++) {
+                previous = previous.next;
+                metrics.steps++;
+            }
+            node.next = previous.next;
+            previous.next = node;
+            metrics.moves += 2;
+        }
         size++;
     }
-    if(index > 0 ){
+
+    @Override
+    public int[] toArray() {
+        int[] copy = new int[size];
         Node current = head;
-        for (int i =0;i < index - 1;i++){
+        for (int i = 0; i < size; i++) {
+            copy[i] = current.value;
             current = current.next;
-            steps++;
         }
-        Node newNode = new Node(x);
-        newNode.next = current.next;
-        current.next = newNode;
-        size++;
-        moves++;
-        steps++;
-
-
+        return copy;
     }
 
-
+    private void checkElementIndex(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

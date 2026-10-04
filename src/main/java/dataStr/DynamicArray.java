@@ -14,7 +14,6 @@ public class DynamicArray {
     public DynamicArray(int size){
 
         this.data = new int[size];
-        this.size = 10;
 
     }
 public void add(int x){
@@ -71,7 +70,6 @@ public boolean contains(int x){
  }
 
   public void add(int index, int x){
-      int elem = data[index];
       if (index > size || index < 0){
           throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
       }

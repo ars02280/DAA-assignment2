@@ -134,6 +134,27 @@ public class MinHeap implements Measurable {
         metrics.moves++;               // final store of x
     }
 
+    /**
+     * Floyd's bottom-up heap construction in O(n): copies {@code array} and sifts down every
+     * inner node, from the last one to the root. The input array is not modified.
+     * <p>
+     * Counters include the copy, so they can be compared fairly with n separate {@link #insert(int)} calls.
+     */
+    public static MinHeap buildHeap(int[] array) {
+        MinHeap heap = new MinHeap(array.length);
+        for (int i = 0; i < array.length; i++) {
+            heap.data[i] = array[i];
+            heap.metrics.steps++;      // read array[i]
+            heap.metrics.moves++;      // write heap.data[i]
+        }
+        heap.size = array.length;
+        for (int i = heap.size / 2 - 1; i >= 0; i--) {
+            heap.metrics.steps++;      // read data[i]
+            heap.siftDown(i, heap.data[i]);
+        }
+        return heap;
+    }
+
     private void grow() {
         if (data.length > Integer.MAX_VALUE / 2) {
             throw new IllegalStateException("Capacity overflow");
